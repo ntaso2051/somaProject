@@ -7,13 +7,16 @@ public class EnemyController : MonoBehaviour
     public const float INF = 10000000000000000000.0f;
     public const float groundY = 1.0f;  //接地判定オブジェクトを作る方がよさそう
     public const float gunRange = 1.0f; //弾丸の届く範囲(ターゲットのy座標に依存しそう)
+    public const int holdTime = 3000;
+    public int flameCnt = 0;
+    Vector3 oldPos;
     public bool isMoving = true;
     public bool canAttack = false;
     TargetGenerator targetGene;
     public List<Vector2> targetPosList = new List<Vector2>();
     public GameObject targetOfThis = null;
     public Rigidbody rigidbody = null;
-    public float speed = 0.1f;
+    public float speed = 10.0f;
     Vector3 toTargetVec;
     // Start is called before the first frame update
     void Start()
@@ -25,6 +28,7 @@ public class EnemyController : MonoBehaviour
         getTargetsPos();
         targetOfThis = getClosestTarget();
         toTargetVec = targetOfThis.transform.position - this.transform.position;
+        oldPos = this.transform.position;
     }
 
     void getTargetsPos()
@@ -101,6 +105,18 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        flameCnt++;
+        if (flameCnt > holdTime) flameCnt %= holdTime;
+        if (flameCnt % holdTime == 0)
+        {
+            if (oldPos == this.transform.position)
+            {
+                targetOfThis = getClosestTarget();
+                if (targetOfThis != null)
+                    toTargetVec = targetOfThis.transform.position - this.transform.position;
+            }
+            oldPos = this.transform.position;
+        }
         if (this.transform.position.y == groundY)
         {
             checkInRange();
